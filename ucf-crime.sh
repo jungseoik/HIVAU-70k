@@ -1,0 +1,1 @@
+curl -k -O https://www.crcv.ucf.edu/data1/chenchen/UCF_Crimes.zip
