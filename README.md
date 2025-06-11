@@ -29,10 +29,23 @@ HIVAU-70k, a large-scale benchmark for hierarchical video anomaly understanding 
             │   └── videos
             │       ├── train
             │       └── test
+            │   └── clips
+            │       ├── train
+            │       └── test
+            │   └── events
+            │       ├── train
+            │       └── test
             └── xd-violence
                 └── videos
                     ├── train
                     └── test
+                └── clips
+                    ├── train
+                    └── test
+                └── events
+                    ├── train
+                    └── test
+  
 ```
 
 각 `train/`, `test/` 폴더에는 영상 파일들이 직접 위치해야 합니다 (`.mp4` 등).
@@ -51,9 +64,17 @@ pip install -r requirements.txt
 
 ### 1. 데이터 다운로드
 
+* **Huggingface 이용**
+해당 레포는 전처리까지 완료된 데이터입니다. 3. 영상 분할 및 검증 -> 생략 가능
+```bash
+git lfs install
+git clone https://huggingface.co/datasets/backseollgi/HIVAU-70k_XD-Violence
+git clone https://huggingface.co/datasets/backseollgi/HIVAU-70k_XD-Violence
+```
+---
 * **직접 다운로드**
   `UCF-Crime`과 `XD-Violence` 비디오는 각각 **공식 홈페이지**에서 수동으로 다운로드하는 것이 가장 안정적입니다.
-
+---
 * **터미널 스크립트 실행**
   아래 명령어로 다운로드 디렉터리를 만들고 `.sh` 스크립트를 실행해 자동 다운로드를 시도할 수 있습니다:
 
@@ -74,7 +95,6 @@ bash data_unzip.sh
 
 ---
 
-
 ### 2. 폴더 정리
 
 위에 명시한 폴더 구조에 따라 파일들을 정리합니다.
@@ -90,7 +110,7 @@ cd src
 # 영상 분할 (디폴트 스레드 12)
 python split_video.py
 # (옵션 변경 가능)
-python split_video.py --n_thread 16
+python split_video.py --n_thread 4
 
 ### 2.
 python check_video.py
