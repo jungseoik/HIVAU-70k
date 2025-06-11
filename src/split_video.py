@@ -18,66 +18,36 @@ def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-# def split_video_decord(video_reader, segment, save_dir, is_frame=False):
-#     fps = video_reader.get_avg_fps()
-#     if is_frame:
-#         start_frame_index, end_frame_index = segment
-#         end_frame_index = min(end_frame_index, len(video_reader)-1)
-#     else:
-#         start_time, end_time = segment
-#         start_frame_index = int(start_time * fps)
-#         end_frame_index = min(int(end_time * fps), len(video_reader)-1)
-#     frames = video_reader.get_batch(range(start_frame_index, end_frame_index)).asnumpy()
-#     frame_width = frames[0].shape[1]
-#     frame_height = frames[0].shape[0]
-
-#     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-#     video_writer = cv2.VideoWriter(save_dir, fourcc, fps, (frame_width, frame_height))
-#     for frame in frames:
-#         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) 
-#         video_writer.write(frame)
-#     video_writer.release()
-
-
-def split_video_decord(video_reader, segment, save_dir, is_frame=False, batch_size=BATCH_SIZE):
+def split_video_decord(video_reader, segment, save_path, is_frame=False):
     fps = video_reader.get_avg_fps()
+
+    # 프레임 범위 계산
     if is_frame:
         start_frame_index, end_frame_index = segment
-        end_frame_index = min(end_frame_index, len(video_reader)-1)
     else:
         start_time, end_time = segment
         start_frame_index = int(start_time * fps)
-        end_frame_index = min(int(end_time * fps), len(video_reader)-1)
+        end_frame_index = int(end_time * fps)
 
-    # print(f"[INFO] Start split: {save_dir}")
-    # print(f"[MEM] Before first frame: {get_memory_mb():.2f} MB")
-    first_frame = video_reader[start_frame_index].asnumpy()
-    # print(f"[MEM] After first frame: {get_memory_mb():.2f} MB")
+    # 범위 유효성 검사 및 보정
+    end_frame_index = min(end_frame_index, len(video_reader))
+    if start_frame_index >= end_frame_index:
+        raise ValueError("Invalid segment: start_frame_index must be less than end_frame_index")
 
-    frame_height, frame_width = first_frame.shape[:2]
+    sample_frame = video_reader[start_frame_index].asnumpy()
+    frame_height, frame_width = sample_frame.shape[:2]
+
+    # 비디오 라이터 설정
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    writer = cv2.VideoWriter(save_dir, fourcc, fps, (frame_width, frame_height))
-    writer.write(cv2.cvtColor(first_frame, cv2.COLOR_RGB2BGR))
+    video_writer = cv2.VideoWriter(save_path, fourcc, fps, (frame_width, frame_height))
 
-    # 배치 단위 처리
-    for i in tqdm(range(start_frame_index + 1, end_frame_index + 1, batch_size), desc="Writing"):
-        batch_end = min(i + batch_size, end_frame_index + 1)
-        # print(f"[MEM] Before batch {i}-{batch_end}: {get_memory_mb():.2f} MB")
+    # 프레임 하나씩 읽고 저장
+    for idx in range(start_frame_index, end_frame_index):
+        frame = video_reader[idx].asnumpy()
+        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        video_writer.write(frame_bgr)
 
-        frames = video_reader.get_batch(range(i, batch_end)).asnumpy()
-
-        # print(f"[MEM] After loading batch: {get_memory_mb():.2f} MB")
-        for frame in frames:
-            writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-
-        del frames
-        gc.collect()
-        # print(f"[MEM] After gc.collect(): {get_memory_mb():.2f} MB")
-
-    writer.release()
-    # print(f"[INFO] Finished split: {save_dir}")
-    # print("-" * 60)
-
+    video_writer.release()
 
 def get_vid_list(json_data, instruction_data):
     ins_vid_list = []
