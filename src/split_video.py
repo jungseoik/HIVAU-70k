@@ -12,7 +12,7 @@ BATCH_SIZE = 100
 def get_memory_mb():
     """current process memory usage (MB)"""
     process = psutil.Process(os.getpid())
-    return process.memory_info().rss / 1024 / 1024  # MB 단위
+    return process.memory_info().rss / 1024 / 1024  
 
 def mkdir(path):
     if not os.path.exists(path):
@@ -21,7 +21,6 @@ def mkdir(path):
 def split_video_decord(video_reader, segment, save_path, is_frame=False):
     fps = video_reader.get_avg_fps()
 
-    # 프레임 범위 계산
     if is_frame:
         start_frame_index, end_frame_index = segment
     else:
@@ -29,7 +28,6 @@ def split_video_decord(video_reader, segment, save_path, is_frame=False):
         start_frame_index = int(start_time * fps)
         end_frame_index = int(end_time * fps)
 
-    # 범위 유효성 검사 및 보정
     end_frame_index = min(end_frame_index, len(video_reader))
     if start_frame_index >= end_frame_index:
         raise ValueError("Invalid segment: start_frame_index must be less than end_frame_index")
@@ -37,11 +35,10 @@ def split_video_decord(video_reader, segment, save_path, is_frame=False):
     sample_frame = video_reader[start_frame_index].asnumpy()
     frame_height, frame_width = sample_frame.shape[:2]
 
-    # 비디오 라이터 설정
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video_writer = cv2.VideoWriter(save_path, fourcc, fps, (frame_width, frame_height))
 
-    # 프레임 하나씩 읽고 저장
+    ## edit here too many memory usage
     for idx in range(start_frame_index, end_frame_index):
         frame = video_reader[idx].asnumpy()
         frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)

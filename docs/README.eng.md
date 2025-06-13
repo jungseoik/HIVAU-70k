@@ -1,8 +1,6 @@
 # HIVAU-70k
+
 HIVAU-70k, a large-scale benchmark for hierarchical video anomaly understanding across any granularity.
-
-[![English](https://img.shields.io/badge/README-English-blue)](README.eng.md) [![한국어](https://img.shields.io/badge/README-한국어-red)](docs/README.ko.md)
-
 
 > This repository extracts and organizes **only the code for generating the HIVAU-70k benchmark based on UCF-Crime and XD-Violence** from the [HolmesVAU official repository](https://github.com/pipixin321/HolmesVAU). For model training, inference code, and the full framework, please refer to the original repo.
 

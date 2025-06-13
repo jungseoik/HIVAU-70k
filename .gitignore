@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 *.zip
 *.mp4
+.qodo
